@@ -1,0 +1,99 @@
+voting pods and worker pod gets deleted and ater sometime automatcially recreated with different id 
+
+
+
+
+[root@ip-172-31-35-222 k8s-specifications]# kubectl delete pod worker-dd46d7584-zkjvv
+pod "worker-dd46d7584-zkjvv" deleted
+[root@ip-172-31-35-222 k8s-specifications]# kubectl get pods
+NAME                      READY   STATUS    RESTARTS   AGE
+db-b54cd94f4-777r8        1/1     Running   0          44m
+redis-868d64d78-7qdql     1/1     Running   0          44m
+result-5d57b59f4b-69vmd   1/1     Running   0          44m
+vote-94849dc97-7dvdp      1/1     Running   0          23m
+worker-dd46d7584-qdmzw    1/1     Running   0          38s
+[root@ip-172-31-35-222 k8s-specifications]# kubectl delete pod vote-94849dc97-7dvdp
+pod "vote-94849dc97-7dvdp" deleted
+[root@ip-172-31-35-222 k8s-specifications]# kubectl get pods
+NAME                      READY   STATUS    RESTARTS   AGE
+db-b54cd94f4-777r8        1/1     Running   0          46m
+redis-868d64d78-7qdql     1/1     Running   0          46m
+result-5d57b59f4b-69vmd   1/1     Running   0          46m
+vote-94849dc97-wds74      1/1     Running   0          23s
+worker-dd46d7584-qdmzw    1/1     Running   0          2m1s
+
+result pod deletion
+
+[root@ip-172-31-35-222 k8s-specifications]# kubectl delete pod result-5d57b59f4b-69vmd
+pod "result-5d57b59f4b-69vmd" deleted
+[root@ip-172-31-35-222 k8s-specifications]# kubectl get pods
+NAME                      READY   STATUS    RESTARTS   AGE
+db-b54cd94f4-4mr5b        1/1     Running   0          66s
+redis-868d64d78-7qdql     1/1     Running   0          48m
+result-5d57b59f4b-69vmd   1/1     Running   0          48m
+vote-94849dc97-wds74      1/1     Running   0          3m3s
+worker-dd46d7584-qdmzw    1/1     Running   1          4m41s
+[root@ip-172-31-35-222 k8s-specifications]#
+
+DB deletion 
+
+[root@ip-172-31-35-222 k8s-specifications]# kubectl delete pod db-b54cd94f4-777r8
+pod "db-b54cd94f4-777r8" deleted
+[root@ip-172-31-35-222 k8s-specifications]# kubectl get pods
+NAME                      READY   STATUS    RESTARTS   AGE
+db-b54cd94f4-4mr5b        1/1     Running   0          66s
+redis-868d64d78-7qdql     1/1     Running   0          48m
+result-5d57b59f4b-69vmd   1/1     Running   0          48m
+vote-94849dc97-wds74      1/1     Running   0          3m3s
+worker-dd46d7584-qdmzw    1/1     Running   1          4m41s
+[root@ip-172-31-35-222 k8s-specifications]#
+
+
+[root@ip-172-31-35-222 k8s-specifications]# kubectl get svc
+NAME         TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
+db           ClusterIP   10.104.47.234    <none>        5432/TCP         50m
+kubernetes   ClusterIP   10.96.0.1        <none>        443/TCP          51m
+redis        ClusterIP   10.108.154.151   <none>        6379/TCP         50m
+result       NodePort    10.110.65.88     <none>        5001:31001/TCP   50m
+vote         NodePort    10.100.91.107    <none>        5000:31000/TCP   50m
+
+
+
+[root@ip-172-31-35-222 k8s-specifications]# kubectl get nodes -v=8
+I0926 07:45:44.107993   31768 loader.go:375] Config loaded from file:  /root/.kube/config
+I0926 07:45:44.120718   31768 round_trippers.go:420] GET https://172.31.35.222:6443/api/v1/nodes?limit=500
+I0926 07:45:44.120861   31768 round_trippers.go:427] Request Headers:
+I0926 07:45:44.120943   31768 round_trippers.go:431]     Accept: application/json;as=Table;v=v1;g=meta.k8s.io,application/json;as=Table;v=v1beta1;g=meta.k8s.io,application/json
+I0926 07:45:44.121040   31768 round_trippers.go:431]     User-Agent: kubectl/v1.18.5 (linux/amd64) kubernetes/e6503f8
+I0926 07:45:44.134226   31768 round_trippers.go:446] Response Status: 200 OK in 13 milliseconds
+I0926 07:45:44.134338   31768 round_trippers.go:449] Response Headers:
+I0926 07:45:44.134415   31768 round_trippers.go:452]     Content-Type: application/json
+I0926 07:45:44.134498   31768 round_trippers.go:452]     Date: Mon, 26 Sep 2022 07:45:44 GMT
+I0926 07:45:44.134591   31768 round_trippers.go:452]     Cache-Control: no-cache, private
+I0926 07:45:44.134770   31768 request.go:1068] Response Body: {"kind":"Table","apiVersion":"meta.k8s.io/v1","metadata":{"selfLink":"/api/v1/nodes","resourceVersion":"1000515"},"columnDefinitions":[{"name":"Name","type":"string","format":"name","description":"Name must be unique within a namespace. Is required when creating resources, although some resources may allow a client to request the generation of an appropriate name automatically. Name is primarily intended for creation idempotence and configuration definition. Cannot be updated. More info: http://kubernetes.io/docs/user-guide/identifiers#names","priority":0},{"name":"Status","type":"string","format":"","description":"The status of the node","priority":0},{"name":"Roles","type":"string","format":"","description":"The roles of the node","priority":0},{"name":"Age","type":"string","format":"","description":"CreationTimestamp is a timestamp representing the server time when this object was created. It is not guaranteed to be set in happens-before order across separate operations. Clients may not set this value. It  [truncated 11579 chars]
+NAME                                               STATUS   ROLES    AGE   VERSION
+ip-172-31-10-173.ap-southeast-1.compute.internal   Ready    <none>   72m   v1.18.5
+ip-172-31-35-222.ap-southeast-1.compute.internal   Ready    master   5d    v1.18.5
+ip-172-31-35-93.ap-southeast-1.compute.internal    Ready    <none>   5d    v1.18.5
+
+
+
+
+commands used 
+sudo su
+git clone https://github.com/ashishrpandey/example-voting-app
+cd /root/example-voting-app/k8s-specifications
+kubectl apply -f 
+kubectl get pods 
+Kubectl get ns
+Kubectl get svc
+kubectl delete pod vote-94849dc97-7dvdp
+kubectl delete pods result-5d57b59f4b-69vmd
+kubectl delete pod db-b54cd94f4-777r8
+
+antoher pod gets created with change in timing(Age) 
+
+Im not able to see the delete pod working and see restart of pod 
+after deletion of db pods the resutls are not getting updated 
+
+The pod is always stateless 
