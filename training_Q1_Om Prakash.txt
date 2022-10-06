@@ -1,0 +1,65 @@
+Write a common use-case, where you will use a daemon set instead of replica set.
+
+
+Daemon set ensures that all or some nodes run a copy of a Pod as defined in configuraton file . 
+They are useful for deploying ongoing background tasks to be run on all or some nodes which does not rquire user intervention.
+e.g are node monitoring daemons like collectd , storage daemonds like ceph etc. 
+
+
+wheras ReplicaSet ensures that the number of pods of an application is running on the correct scale as specified in the conf file
+
+
+
+
+kubectl create -f daemonset-example.yaml
+
+kubectl get daemonset
+
+
+kubectl get pod -o wide
+
+below is the structure of DaemonSet file  
+daemonset-example.yaml 
+
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+name: fluentd-elasticsearch-test
+namespace: default # Name Space
+labels:
+k8s-app: fluentd-logging
+spec:
+selector: # Selector
+matchLabels: 
+name: fluentd-elasticsearch-test-deamonset
+template: # Pod Template
+metadata:
+labels:
+name: fluentd-elasticsearch-test-deamonset
+spec:
+tolerations: # Tolerations
+- key: node-role.kubernetes.io/master
+effect: NoSchedule
+containers: # Container Details
+- name: fluentd-elasticsearch
+image: quay.io/fluentd_elasticsearch/fluentd:v2.5.2
+resources:
+limits:
+memory: 200Mi
+requests:
+cpu: 100m
+memory: 200Mi
+volumeMounts:
+- name: varlog
+mountPath: /var/log
+- name: varlibdockercontainers
+mountPath: /var/lib/docker/containers
+readOnly: true
+terminationGracePeriodSeconds: 30
+volumes:
+- name: varlog
+hostPath:
+path: /var/log
+- name: varlibdockercontainers
+hostPath:
+path: /var/lib/docker/containers
