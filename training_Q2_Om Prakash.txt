@@ -1,0 +1,49 @@
+Suppose you have deployed your application using a deployment controller. Assume the initial number of replicas is one. 
+Write the steps needed to update a container's image using deployment,making sure that there is zero downtime.
+
+
+Deployments are managed by the Kubernetes Deployment controller. 
+Deployments use a Pod template, which contains a specification for its Pods.
+ 
+The Pod specification determines how each Pod should look like: what applications should run inside its containers, 
+which volumes the Pods should mount, its labels, and more
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: linux-deployment
+  namespace: app1
+  labels:
+    app: linux-app1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: linux-app1
+  template:
+    metadata:
+      labels:
+        app: linux-app1
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/arch
+                operator: In
+                values:
+                - amd64
+                - arm64
+      containers:
+      - name: nginx
+        image: public/nginx/nginx:1.21
+        ports:
+        - name: http
+          containerPort: 80
+        imagePullPolicy: Always
+      nodeSelector:
+        kubernetes.io/os: linux
+
+
+kubectl apply -f example-deployment.yaml
